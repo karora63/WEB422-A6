@@ -3,7 +3,7 @@ import { useAtom } from "jotai";
 import { useRouter } from "next/router";
 import React from "react";
 import { Button, Card, ListGroup, Row } from "react-bootstrap";
-import styles from "@/styles/History.module.css";
+import styles from "../styles/History.module.css";
 import { removeFromHistory } from "@/lib/userData";
 
 export default function History() {

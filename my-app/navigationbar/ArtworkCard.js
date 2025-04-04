@@ -1,50 +1,39 @@
+import useSWR from 'swr';
+import Link from 'next/link';
+import { Card, Button } from 'react-bootstrap';
+import Error from 'next/error';
 
-import useSWR from "swr";
-import Error from "next/error";
-import { Button, Card } from "react-bootstrap";
-import Link from "next/link";
+export default function ArtworkCard({ objectID }) {
+  const { data, error } = useSWR(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectID}`);
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+  if (error) return <Error statusCode={404} />;
+  if (!data) return null;
 
-export default function ArtworkCard(props) {
-  const url = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${props.objectID}`;
+  // Use primaryImage if available, otherwise use primaryImageSmall
+  const imageSrc = data.primaryImage || data.primaryImageSmall || "https://via.placeholder.com/300x300.png?text=No+Image";
 
-  const { data, error } = useSWR(url, fetcher);
-  if (data) {
-    return (
-      <>
-        <Card>
-          {data?.primaryImageSmall ? (
-            <Card.Img variant="top" src={data?.primaryImageSmall} />
-          ) : (
-            <Card.Img
-              variant="top"
-              src="https://via.placeholder.com/375x375.png?text=%5b+Not+Available+%5d"
-            />
-          )}
-          <Card.Body>
-            <Card.Title>{data?.title}</Card.Title>
-            <Card.Text>
-              <strong>Date: </strong>
-              {data?.objectDate ? data.objectDate : "N/A"} <br />
-              <strong>Classification: </strong>
-              {data?.classification ? data?.classification : "N/A"}
-              <br />
-              <strong>Medium: </strong> {data?.medium ? data?.medium : "N/A"}
-              <br />
-              <br />
-              <Link passHref href={`/artwork/${props.objectID}`}>
-                <Button variant="outline-primary">
-                  <strong>ID: </strong>
-                  {props.objectID}
-                </Button>{" "}
-              </Link>
-            </Card.Text>
-          </Card.Body>
-        </Card>
-      </>
-    );
-  } else {
-    return <Error statusCode={404} />;
-  }
+  return (
+    <Card className="h-100">
+      <Card.Img 
+        variant="top" 
+        src={imageSrc} 
+        alt={data.title || "Artwork Image"}
+        style={{ height: '250px', objectFit: 'cover' }} 
+        onError={(e) => { e.target.src = "https://via.placeholder.com/300x300.png?text=No+Image"; }} // ✅ Handle broken images
+      />
+      <Card.Body className="d-flex flex-column">
+        <Card.Title>{data.title || "N/A"}</Card.Title>
+        <Card.Text>
+          {data.objectDate || "N/A"} <br />
+          {data.classification || "N/A"} <br />
+          {data.medium || "N/A"}
+        </Card.Text>
+        <div className="mt-auto">
+          <Link href={`/artwork/${objectID}`} passHref legacyBehavior>
+            <Button variant="primary">{objectID}</Button>
+          </Link>
+        </div>
+      </Card.Body>
+    </Card>
+  );
 }
