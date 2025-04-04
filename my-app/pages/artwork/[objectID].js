@@ -1,6 +1,6 @@
 import { Row } from "react-bootstrap";
 import { Col } from "react-bootstrap";
-import ArtworkCardDetail from "@/components/ArtworkCardDetail";
+import ArtworkCardDetail from "@/navigationbar/ArtworkCardDetail";
 import { useRouter } from "next/router";
 
 

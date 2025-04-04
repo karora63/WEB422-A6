@@ -1,6 +1,6 @@
-import Layout from "@/components/Layout";
-import RouteGuard from "@/components/RouteGuard";
-import "@/styles/bootstrap.min.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Layout from "@/navigationbar/Layout";
+import RouteGuard from "@/navigationbar/RouteGuard";
 import { SWRConfig } from "swr";
 
 
