@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Layout from '../navigationbar/components/Layout';
+import Layout from '../components/Layout';
 import { SWRConfig } from 'swr';
-
+import { useState } from 'react';
 
 // Fetcher function for SWR
 const fetcher = async (url) => {
@@ -16,10 +16,21 @@ const fetcher = async (url) => {
 };
 
 export default function MyApp({ Component, pageProps }) {
+  const [error, setError] = useState(null);
+
   return (
-    <SWRConfig value={{ fetcher }}>
+    <SWRConfig
+      value={{
+        fetcher,
+        onError: (err) => setError(err), // Global error handler
+      }}
+    >
       <Layout>
-        <Component {...pageProps} />
+        {error ? (
+          <div className="alert alert-danger">{error.message}</div> // Show global error message
+        ) : (
+          <Component {...pageProps} />
+        )}
       </Layout>
     </SWRConfig>
   );

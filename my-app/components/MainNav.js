@@ -1,33 +1,42 @@
+import { useState, useEffect } from "react";
 import Link from 'next/link';
-import { Navbar, Nav, Form, FormControl, Button, NavDropdown } from 'react-bootstrap';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { useAtom } from 'jotai'; // Import useAtom from jotai
-import { searchHistoryAtom } from '../../store'; // Import the searchHistoryAtom from the store
+import { Navbar, Nav, Form, FormControl, Button, NavDropdown } from "react-bootstrap";
+import { useRouter } from "next/router";
+import { useAtom } from "jotai";
+import { searchHistoryAtom } from "../store"; // Import your atom for search history
+import { readToken, removeToken } from "../lib/authenticate"; // Import authentication functions
 
 export default function MainNav() {
-  
   const router = useRouter();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [isExpanded, setIsExpanded] = useState(false); // State to manage the navbar expansion
   const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom); // Access and modify the search history
 
-  // Handle search submission
+  const [token, setToken] = useState(null);
+
+  // Use effect to safely read token
+  useEffect(() => {
+    const storedToken = readToken();
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+
+  // Function to handle search submission
   const handleSearch = (event) => {
     event.preventDefault();
-
-    // Create the query string for the search
-    const queryString = `title=true&q=${search}`;
-
-    // Update the search history atom with the new search query
-    const newSearchHistory = [...searchHistory, queryString];
-    setSearchHistory(newSearchHistory);
-
-    // Redirect to the search results page
+    const queryString = `q=${search}`; // Simplified search query string
+    setSearchHistory([...searchHistory, queryString]); // Update search history
     router.push(`/artwork?${queryString}`);
+    setIsExpanded(false); // Collapse the navbar
+  };
 
-    // Close the navbar after the search
-    setIsExpanded(false);
+  // Logout function
+  const logout = () => {
+    removeToken(); // Remove the authentication token
+    setToken(null); // Update state
+    setIsExpanded(false); // Collapse the navbar
+    router.push("/login"); // Redirect to the login page
   };
 
   return (
@@ -37,33 +46,62 @@ export default function MainNav() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setIsExpanded(!isExpanded)} />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Link href="/" passHref legacyBehavior>
+            {/* Use Link directly on Nav.Link */}
+            <Link href="/" passHref>
               <Nav.Link onClick={() => setIsExpanded(false)}>Home</Nav.Link>
             </Link>
-            <Link href="/search" passHref legacyBehavior >
-              <Nav.Link onClick={() => setIsExpanded(false)}>Advanced Search</Nav.Link>
-            </Link>
-            <Link href="/history" passHref legacyBehavior> Search History</Link>
-            <NavDropdown title="User Name">
-              <Link href="/favourites" passHref legacyBehavior>
-                <NavDropdown.Item onClick={() => setIsExpanded(false)}>Favourites</NavDropdown.Item>
-              </Link>
-            </NavDropdown>
+
+            {token ? (
+              <>
+                {/* Use Link directly on Nav.Link */}
+                <Link href="/search" passHref>
+                  <Nav.Link onClick={() => setIsExpanded(false)}>Advanced Search</Nav.Link>
+                </Link>
+
+                <NavDropdown title={token.userName || 'User'} id="user-nav-dropdown">
+                  <Link href="/favourites" passHref>
+                    <NavDropdown.Item onClick={() => setIsExpanded(false)}>Favourites</NavDropdown.Item>
+                  </Link>
+                  <Link href="/history" passHref>
+                    <NavDropdown.Item onClick={() => setIsExpanded(false)}>Search History</NavDropdown.Item>
+                  </Link>
+                  <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
+                </NavDropdown>
+              </>
+            ) : (
+              <Nav>
+                <Link href="/register" passHref>
+                  <Nav.Link onClick={() => setIsExpanded(false)} active>
+                    Register
+                  </Nav.Link>
+                </Link>
+                <Link href="/login" passHref>
+                  <Nav.Link onClick={() => setIsExpanded(false)} active>
+                    Login
+                  </Nav.Link>
+                </Link>
+              </Nav>
+            )}
           </Nav>
 
           {/* Search Form */}
-          &nbsp;<Form className="d-flex" onSubmit={handleSearch}>
-            <FormControl
-              type="search"
-              placeholder="Search"
-              className="me-2"
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Button type="submit" variant="outline-light">Search</Button>
-          </Form>&nbsp;
+          {token && (
+            <Form className="d-flex" onSubmit={handleSearch}>
+              <FormControl
+                type="search"
+                placeholder="Search"
+                className="me-2"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <Button type="submit" variant="outline-light">
+                Search
+              </Button>
+            </Form>
+          )}
         </Navbar.Collapse>
       </Navbar>
-      <br /><br />
+      <br />
+      <br />
     </>
   );
 }

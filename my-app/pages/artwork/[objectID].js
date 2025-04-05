@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { Row, Col } from 'react-bootstrap';
-import ArtworkCardDetail from '../../navigationbar/components/ArtworkCardDetail'; 
+import ArtworkCardDetail from '../../components/ArtworkCardDetail'; 
 
 
 export default function ArtworkById() {

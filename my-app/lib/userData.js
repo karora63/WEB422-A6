@@ -1,75 +1,78 @@
-// File: lib/userData.js
+// my-app/lib/userData.js
 
-import { getToken } from './authenticate';  // Ensure the correct path
+const API_URL = "https://user-api-1-vmga.onrender.com/api/user"; // Replace with your actual API URL
+import { getToken } from './authenticate';
 
-export async function addToFavourites(id) {
-  const token = getToken();  // Call getToken to retrieve token
+const headers = () => {
+  const token = getToken();
+  return {
+    Authorization: `JWT ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
 
-  if (!token) {
-    throw new Error("User is not authenticated");
-  }
-
-  const res = await fetch(`https://user-api-1-vmga.onrender.com/api/user/favourites/${id}`, {
-    method: "PUT",
-    headers: {
-      "content-type": "application/json",
-      Authorization: `JWT ${token}`,
-    },
+export const addToFavourites = async (id) => {
+  const res = await fetch(`${API_URL}/favourites/${id}`, {
+    method: 'PUT',
+    headers: headers(),
   });
-
-  const data = await res.json();
-
   if (res.status === 200) {
-    return data;
-  } else {
-    return [];
+    return await res.json();
   }
-}
+  return [];
+};
 
-export async function removeFromFavourites(id) {
-  const token = getToken();  // Call getToken to retrieve token
-
-  if (!token) {
-    throw new Error("User is not authenticated");
-  }
-
-  const res = await fetch(`https://user-api-1-vmga.onrender.com/api/user/favourites/${id}`, {
-    method: "DELETE",
-    headers: {
-      "content-type": "application/json",
-      Authorization: `JWT ${token}`,
-    },
+export const removeFromFavourites = async (id) => {
+  const res = await fetch(`${API_URL}/favourites/${id}`, {
+    method: 'DELETE',
+    headers: headers(),
   });
-
-  const data = await res.json();
-
   if (res.status === 200) {
-    return data;
-  } else {
-    return [];
+    return await res.json();
   }
-}
+  return [];
+};
 
-export async function getFavourites() {
-  const token = getToken();  // Call getToken to retrieve token
-
-  if (!token) {
-    throw new Error("User is not authenticated");
-  }
-
-  const res = await fetch('https://user-api-1-vmga.onrender.com/api/user/favourites', {
-    method: "GET",
-    headers: {
-      "content-type": "application/json",
-      Authorization: `JWT ${token}`,
-    },
+export const getFavourites = async () => {
+  const res = await fetch(`${API_URL}/favourites`, {
+    method: 'GET',
+    headers: headers(),
   });
-
-  const data = await res.json();
-
   if (res.status === 200) {
-    return data;
-  } else {
-    return [];
+    return await res.json();
   }
-}
+  return [];
+};
+
+export const addToHistory = async (id) => {
+  const res = await fetch(`${API_URL}/history/${id}`, {
+    method: 'PUT',
+    headers: headers(),
+  });
+  if (res.status === 200) {
+    return await res.json();
+  }
+  return [];
+};
+
+export const removeFromHistory = async (id) => {
+  const res = await fetch(`${API_URL}/history/${id}`, {
+    method: 'DELETE',
+    headers: headers(),
+  });
+  if (res.status === 200) {
+    return await res.json();
+  }
+  return [];
+};
+
+export const getHistory = async () => {
+  const res = await fetch(`${API_URL}/history`, {
+    method: 'GET',
+    headers: headers(),
+  });
+  if (res.status === 200) {
+    return await res.json();
+  }
+  return [];
+};

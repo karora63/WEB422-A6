@@ -1,24 +1,37 @@
-import { useState } from 'react';  // ✅ Import useState
+import { useState, useEffect } from 'react';  // ✅ Import useState, useEffect
 import { useAtom } from 'jotai';
 import { favouritesAtom } from '@/store';  // ✅ Ensure correct path
 import useSWR from 'swr';
 import { Card, Button } from 'react-bootstrap';
 import Error from 'next/error';
 
+// Import functions for adding/removing favourites
+import { addToFavourites, removeFromFavourites } from '@/lib/userData';
+
 export default function ArtworkCardDetail({ objectID }) {
   const { data, error } = useSWR(objectID ? `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectID}` : null);
   const [favouritesList, setFavouritesList] = useAtom(favouritesAtom);
-  const [showAdded, setShowAdded] = useState(favouritesList.includes(objectID));
+  const [showAdded, setShowAdded] = useState(false);
 
-  const handleFavourites = () => {
+  // Update the "showAdded" state when favouritesList changes
+  useEffect(() => {
+    setShowAdded(favouritesList?.includes(objectID));
+  }, [favouritesList, objectID]);
+
+  // Modify the favourites handling function
+  const handleFavourites = async () => {
     if (showAdded) {
-      setFavouritesList(current => current.filter(fav => fav !== objectID));
+      // If already added to favourites, remove it
+      const updatedFavourites = await removeFromFavourites(objectID);
+      setFavouritesList(updatedFavourites);
     } else {
-      setFavouritesList(current => [...current, objectID]);
+      // If not in favourites, add it
+      const updatedFavourites = await addToFavourites(objectID);
+      setFavouritesList(updatedFavourites);
     }
-    setShowAdded(!showAdded);
+    setShowAdded(!showAdded);  // Toggle the showAdded state
   };
-    
+
   if (error) return <Error statusCode={404} />;
   if (!data) return null;
 
@@ -35,8 +48,7 @@ export default function ArtworkCardDetail({ objectID }) {
         <Card.Text><strong>Artist:</strong> {data.artistDisplayName || "N/A"}  
           {data.artistDisplayName && data.artistWikidata_URL && (
             <> (<a href={data.artistWikidata_URL} target="_blank" rel="noreferrer">wiki</a>)</>
-          )}
-        </Card.Text>
+          )}</Card.Text>
         <Card.Text><strong>Credit Line:</strong> {data.creditLine || "N/A"}</Card.Text>
         <Card.Text><strong>Dimensions:</strong> {data.dimensions || "N/A"}</Card.Text>
 
@@ -47,7 +59,6 @@ export default function ArtworkCardDetail({ objectID }) {
         >
           {showAdded ? "+ Favourite (added)" : "+ Favourite"}
         </Button>
-
       </Card.Body>
     </Card>
   );

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { Row, Col, Card, Pagination } from 'react-bootstrap';
 import validObjectIDList from '@/public/data/validObjectIDList.json'
 import useSWR from 'swr';
-import ArtworkCard from '../../navigationbar/ArtworkCard';
+import ArtworkCard from '../../components/ArtworkCard';
 import Error from 'next/error';
 
 const PER_PAGE = 12; // Number of artworks per page
