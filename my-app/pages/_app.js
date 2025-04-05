@@ -1,29 +1,26 @@
-import Layout from "@/components/Layout";
-import RouteGuard from "@/components/RouteGuard";
-import "@/styles/bootstrap.min.css";
-import { SWRConfig } from "swr";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Layout from '../navigationbar/components/Layout';
+import { SWRConfig } from 'swr';
 
 
-export default function App({ Component, pageProps }) {
+// Fetcher function for SWR
+const fetcher = async (url) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const error = new Error('An error occurred while fetching the data.');
+    error.info = await res.json();
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+};
+
+export default function MyApp({ Component, pageProps }) {
   return (
-    <RouteGuard>
+    <SWRConfig value={{ fetcher }}>
       <Layout>
-        <SWRConfig
-          value={{
-            fetcher: async (url) => {
-              const res = await fetch(url);
-              if (!res.ok) {
-                const error = new Error(
-                  "An error occurred while fetching the data."
-                );
-                throw error;
-              }
-              return res.json();
-            },
-          }}>
-          <Component {...pageProps} />
-        </SWRConfig>
+        <Component {...pageProps} />
       </Layout>
-    </RouteGuard>
+    </SWRConfig>
   );
 }
