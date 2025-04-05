@@ -12,20 +12,12 @@ export default function MainNav() {
   const [isExpanded, setIsExpanded] = useState(false); // State to manage the navbar expansion
   const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom); // Access and modify the search history
 
-  const [token, setToken] = useState(null);
-
-  // Use effect to safely read token
-  useEffect(() => {
-    const storedToken = readToken();
-    if (storedToken) {
-      setToken(storedToken);
-    }
-  }, []);
+  const token = readToken(); // Check if token exists
 
   // Function to handle search submission
   const handleSearch = (event) => {
     event.preventDefault();
-    const queryString = `q=${search}`; // Simplified search query string
+    const queryString = `title=true&q=${search}`;
     setSearchHistory([...searchHistory, queryString]); // Update search history
     router.push(`/artwork?${queryString}`);
     setIsExpanded(false); // Collapse the navbar
@@ -34,7 +26,6 @@ export default function MainNav() {
   // Logout function
   const logout = () => {
     removeToken(); // Remove the authentication token
-    setToken(null); // Update state
     setIsExpanded(false); // Collapse the navbar
     router.push("/login"); // Redirect to the login page
   };
@@ -50,15 +41,13 @@ export default function MainNav() {
             <Link href="/" passHref>
               <Nav.Link onClick={() => setIsExpanded(false)}>Home</Nav.Link>
             </Link>
-
             {token ? (
               <>
-                {/* Use Link directly on Nav.Link */}
                 <Link href="/search" passHref>
                   <Nav.Link onClick={() => setIsExpanded(false)}>Advanced Search</Nav.Link>
                 </Link>
 
-                <NavDropdown title={token.userName || 'User'} id="user-nav-dropdown">
+                <NavDropdown title={token.userName} id="user-nav-dropdown">
                   <Link href="/favourites" passHref>
                     <NavDropdown.Item onClick={() => setIsExpanded(false)}>Favourites</NavDropdown.Item>
                   </Link>
