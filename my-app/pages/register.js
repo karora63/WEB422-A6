@@ -1,69 +1,84 @@
-import { useState } from "react";
+import { Card, Form, Alert, Button } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { registerUser } from "../lib/authenticate";
 import { useRouter } from "next/router";
-import { registerUser } from "@/lib/authenticate"; // Registration function
 
-function Register() {
-  const [email, setEmail] = useState("");
+export default function Register(props) {
+  const [warning, setWarning] = useState("");
+  const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
-  const [error, setError] = useState(null);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  
+  async function handleSubmit(e) {
     e.preventDefault();
-
-    if (password !== password2) {
-      setError("Passwords do not match.");
-      return;
-    }
-
     try {
-      // Register the user
-      await registerUser(email, password, password2);
-
-      // Redirect to login page after successful registration
+      await registerUser(user, password, password2);
       router.push("/login");
     } catch (err) {
-      setError("Error registering user, please try again.");
+      setWarning(err.message);
     }
-  };
+  }
 
   return (
-    <div>
-      <h2>Register</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+    <>
+      <Card bg="light">
+        <Card.Body>
+          <h2>Register</h2>
+          Register for an account:
+        </Card.Body>
+      </Card>
+
+      <br />
+
+      <Form onSubmit={handleSubmit}>
+        <Form.Group>
+          <Form.Label>User:</Form.Label>
+          <Form.Control
+            type="text"
+            value={user}
+            id="userName"
+            name="userName"
+            onChange={(e) => setUser(e.target.value)}
           />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
+        </Form.Group>
+        <br />
+        <Form.Group>
+          <Form.Label>Password:</Form.Label>
+          <Form.Control
             type="password"
             value={password}
+            id="password"
+            name="password"
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
-        </div>
-        <div>
-          <label>Confirm Password:</label>
-          <input
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Label>Confirm Password:</Form.Label>
+          <Form.Control
             type="password"
             value={password2}
+            id="password"
+            name="password"
             onChange={(e) => setPassword2(e.target.value)}
-            required
+            D
           />
-        </div>
-        <button type="submit">Register</button>
-      </form>
-    </div>
+        </Form.Group>
+
+        {warning && (
+          <>
+            <br />
+            <Alert variant="danger">{warning}</Alert>
+          </>
+        )}
+
+        <br />
+        <Button variant="primary" className="pull-right" type="submit">
+          Register
+        </Button>
+      </Form>
+    </>
   );
 }
-
-export default Register;

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { isAuthenticated } from "../../lib/authenticate";
+import { isAuthenticated } from "../lib/authenticate";
 import { favouritesAtom, searchHistoryAtom } from "@/store";
 import { getFavourites, getHistory } from "@/lib/userData";
 import { useAtom } from "jotai";
